@@ -7,7 +7,33 @@
     <title>Untitled Game</title>
   </head>
   <body>
-    <canvas id="gameCanvas" height="500" width="800"></canvas>
+    <canvas id="gameCanvas"></canvas>
+    <div style="display: none">
+      <!-- background layers -->
+
+      <img id="layer1" src="./assets//bg-layers/Layer_0000_9.png" alt="" />
+      <img id="layer2" src="./assets/bg-layers/Layer_0001_8.png" alt="" />
+      <img id="layer3" src="./assets/bg-layers/Layer_0002_7.png" alt="" />
+      <img id="layer4" src="./assets/bg-layers/Layer_0003_6.png" />
+      <img id="layer5" src="./assets/bg-layers/Layer_0005_5.png" alt="" />
+      <img id="layer6" src="./assets//bg-layers/Layer_0006_4.png" alt="" />
+      <img
+        id="layer-light"
+        src="./assets/bg-layers/Layer_0007_Lights.png"
+        alt=""
+      />
+      <img id="layer8" src="./assets/bg-layers/Layer_0008_3.png" alt="" />
+      <img id="layer9" src="./assets/bg-layers/Layer_0009_2.png" alt="" />
+      <img id="layer10" src="./assets/bg-layers/Layer_0010_1.png" alt="" />
+      <img id="layer11" src="./assets/bg-layers/Layer_0011_0.png" alt="" />
+
+      <!-- spritesheet -->
+      <img id="hero-run" src="./assets/hero-sprite/run.png" alt="" />
+    </div>
   </body>
+  <script src="globalVariables.js"></script>
+  <script src="controls.js"></script>
   <script src="game.js"></script>
+  <script src="display.js"></script>
+  <script src="main.js"></script>
 </html>

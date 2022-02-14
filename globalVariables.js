@@ -1,0 +1,4 @@
+const CANVAS_HEIGHT = 655;
+const CANVAS_WIDTH = 900;
+let LAYER_SPEED = 3;
+const BASE_HEIGHT = 50;
