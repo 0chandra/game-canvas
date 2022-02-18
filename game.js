@@ -76,7 +76,6 @@ class Game {
       return false;
     }
     if (colideX && colideY && !(character1.isColided || character2.isColided)) {
-      console.log("burhhh");
       character1.isColided = true;
       character2.isColided = true;
       return true;
@@ -89,9 +88,10 @@ class Game {
     if (this.pressedKeys.length == 0) {
       // character.setSpriteSheet("hero-idle", 6);
       // this.moveToOrigin(character, character.origin);
-      // LAYER_SPEED = 0;
+      LAYER_SPEED = 0;
       if (!character.inAction) {
         character.setSpriteSheet("hero-idle", 6);
+        this.moveToOrigin(character, character.origin);
       }
     }
 
@@ -100,7 +100,7 @@ class Game {
     if (this.pressedKeys.indexOf("ArrowRight") > -1) {
       character.setSpriteSheet("hero-run", 8);
       this.move(character, "right");
-      LAYER_SPEED = 4;
+      LAYER_SPEED = LAYER_SPEED_DEFAULT;
     }
     if (
       this.pressedKeys.indexOf("ArrowLeft") > -1 &&
@@ -119,10 +119,9 @@ class Game {
       LAYER_SPEED = 0;
       this.strike("action1", character);
       character.inAction = true;
-      console.log("jhjhhjfgdgdg");
+
       setTimeout(() => {
         character.inAction = false;
-        console.log("jhfjhf");
       }, 550);
     }
   }
@@ -152,6 +151,7 @@ class Game {
       this.inAirHeight = 0;
     } else {
       if (!character.falling) {
+        console.log(character.y);
         // speed at which the character should jump in the upward directions, higher the character is in the air slower it gets, due to gravity. the velocity reduces.
         const speed =
           character.velocityY *
@@ -272,10 +272,6 @@ class Player {
   }
 
   setSpriteSheet(spriteSheetId, numberOfFrames) {
-    HERO_SPRITE_HEIGHT = 88;
-    if (spriteSheetId == "hero-sword1") {
-      HERO_SPRITE_HEIGHT = 128;
-    }
     this.spriteSheet = document.getElementById(spriteSheetId);
 
     this.timePerFrame = 100;
@@ -284,7 +280,9 @@ class Player {
     this.spriteWidth = this.spriteSheet.width;
     this.spriteHeight = this.spriteSheet.height;
     this.height = this.spriteSheet.height;
-    console.log(this.height);
+    HERO_SPRITE_HEIGHT = this.height;
+    // console.log(this.height);
+
     // single frame/sprite width; height is same as spriteHeight
     this.numberOfFrames = numberOfFrames;
     this.frameWidth = this.spriteWidth / this.numberOfFrames;
@@ -295,6 +293,7 @@ class Player {
     if (Date.now() - this.lastUpdate >= this.timePerFrame) {
       this.clippingX = this.playerFrameIndex * this.frameWidth;
       this.clippingY = this.spriteHeight;
+
       this.playerFrameIndex++;
       if (this.playerFrameIndex >= this.numberOfFrames) {
         this.playerFrameIndex = 0;

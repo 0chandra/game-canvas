@@ -27,21 +27,29 @@ window.onload = function () {
     // game.move(game.player);
   });
 
+  let lastUpdateTime = Date.now();
+  const timePerFrame = TIME_PER_FRAME;
+
   const loop = function () {
-    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    display.drawBackgroundParalax(ctx);
-    // display.drawBackground(ctx, CANVAS_HEIGHT, CANVAS_WIDTH, "black");
+    const currentTime = Date.now();
+    if (currentTime - lastUpdateTime >= timePerFrame) {
+      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      display.drawBackgroundParalax(ctx);
+      // display.drawBackground(ctx, CANVAS_HEIGHT, CANVAS_WIDTH, "black");
 
-    game.player.update();
-    game.update(game.player);
-    display.drawPlayer(ctx, game.player);
+      game.player.update();
+      game.update(game.player);
+      display.drawPlayer(ctx, game.player);
 
-    game.powerUps.forEach((pu) => {
-      display.drawObstacle(ctx, pu);
-      game.areColided(game.player, pu);
-      game.player.isColided = false;
-    });
-    game.updateObstacle();
+      game.powerUps.forEach((pu) => {
+        display.drawObstacle(ctx, pu);
+        game.areColided(game.player, pu);
+        game.player.isColided = false;
+      });
+      game.updateObstacle();
+      // console.log("fps1", 1000 / (currentTime - lastUpdateTime));   -->> FPS counter
+      lastUpdateTime = currentTime;
+    }
     requestAnimationFrame(loop);
   };
 
