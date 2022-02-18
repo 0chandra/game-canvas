@@ -155,13 +155,13 @@ class Game {
         // speed at which the character should jump in the upward directions, higher the character is in the air slower it gets, due to gravity. the velocity reduces.
         const speed =
           character.velocityY *
-          (8 - (this.inAirHeight * 8) / character.jumpHeight);
+          (15 - (this.inAirHeight * 15) / character.jumpHeight);
 
         character.y -= speed;
         this.inAirHeight += speed;
 
         // will make character.falling true, if the character has reached the needed height, i.e. jumpHeight-2
-        this.inAirHeight > character.jumpHeight - 8
+        this.inAirHeight > character.jumpHeight - 15
           ? (character.falling = true)
           : (character.falling = false);
       } else {
@@ -169,7 +169,7 @@ class Game {
 
         const speed =
           character.velocityY *
-          (8 - (this.inAirHeight * 8) / character.jumpHeight);
+          (15 - (this.inAirHeight * 15) / character.jumpHeight);
         character.y += speed;
         this.inAirHeight -= speed;
 
@@ -281,7 +281,6 @@ class Player {
     this.spriteHeight = this.spriteSheet.height;
     this.height = this.spriteSheet.height;
     HERO_SPRITE_HEIGHT = this.height;
-    // console.log(this.height);
 
     // single frame/sprite width; height is same as spriteHeight
     this.numberOfFrames = numberOfFrames;
