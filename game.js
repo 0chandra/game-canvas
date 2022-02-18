@@ -91,6 +91,7 @@ class Game {
       LAYER_SPEED = 0;
       if (!character.inAction) {
         character.setSpriteSheet("hero-idle", 6);
+        // character.y = HERO_HEIGHT;
         this.moveToOrigin(character, character.origin);
       }
     }
@@ -116,13 +117,14 @@ class Game {
     }
     if (this.pressedKeys.indexOf("Control") > -1) {
       // this.move(character, "left");
+      character.inAction = true;
       LAYER_SPEED = 0;
       this.strike("action1", character);
-      character.inAction = true;
 
       setTimeout(() => {
         character.inAction = false;
-      }, 550);
+        character.y = HERO_HEIGHT;
+      }, 3000);
     }
   }
 
@@ -281,6 +283,9 @@ class Player {
     this.spriteHeight = this.spriteSheet.height;
     this.height = this.spriteSheet.height;
     HERO_SPRITE_HEIGHT = this.height;
+    if (this.inAction) {
+      this.y = HERO_HEIGHT - 40;
+    }
 
     // single frame/sprite width; height is same as spriteHeight
     this.numberOfFrames = numberOfFrames;
