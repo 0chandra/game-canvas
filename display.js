@@ -54,6 +54,7 @@ class Display {
   }
 
   drawPlayer(context, playerObj) {
+    // console.log(playerObj);
     context.drawImage(
       playerObj.spriteSheet,
       playerObj.clippingX,
@@ -65,6 +66,7 @@ class Display {
       playerObj.frameWidth,
       playerObj.spriteHeight
     );
+    // this.drawRect(context, playerObj);
   }
 
   // main character is a layered circle (multiple circles with same origin/center-point)
@@ -110,6 +112,7 @@ class ParallaxLayer {
     this.src = src;
   }
   draw(context, distance) {
+    // console.log(LAYER_SPEED);
     context.drawImage(this.src, this.x, 0);
     context.drawImage(this.src, this.duplicateX, 0);
 

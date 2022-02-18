@@ -17,18 +17,18 @@ class Game {
     this.inAirHeight = 0;
     this.powerUps = [];
 
-    this.player = new Player("hero-run", 8, 50);
+    this.player = new Player();
   }
-  // colider detector, detects colid with the boundries of the game
+  // colider detector, detects colidation with the borders of the game. (excluding the margin at the bottom - ground)
   colide(character) {
     if (character.x + character.width > this.gameWidth || character.x < 0) {
       character.velocityX = 0;
       character.x < 0 ? (character.x += 0.05) : (character.x -= 0.05);
     } else {
-      character.velocityX = 2;
+      character.velocityX = 0;
     }
-    if (character.y + character.height > this.gameHeight - BASE_HEIGHT) {
-      character.y = this.gameHeight - BASE_HEIGHT - character.height;
+    if (character.y + character.height > CANVAS_HEIGHT - BASE_HEIGHT) {
+      character.y = CANVAS_HEIGHT - BASE_HEIGHT - character.height;
     } else if (character.y < 0) {
       character.y = 0;
     }
@@ -42,11 +42,24 @@ class Game {
     let colideX;
     let colideY;
 
+    // checking if colide cordinates exists or not (to know what colide cordinates are, read comment in Player() Class)
+    const character1_x1 = character1.colideX1
+      ? character1.colideX1
+      : character1.x;
+    const character1_x2 = character1.colideX2
+      ? character1.colideX2
+      : character1.x + character1.width;
+
+    const character2_x1 = character2.colideX1
+      ? character2.colideX1
+      : character2.x;
+    const character2_x2 = character2.colideX2
+      ? character2.colideX2
+      : character2.x + character2.width;
+
     if (
-      (character1.x > character2.x &&
-        character1.x < character2.width + character2.x) ||
-      (character2.x > character1.x &&
-        character2.x < character1.width + character1.x)
+      (character1_x1 > character2_x1 && character1_x1 < character2_x2) ||
+      (character2_x1 > character1_x1 && character2_x1 < character1_x2)
     ) {
       colideX = true;
     } else {
@@ -63,7 +76,7 @@ class Game {
       return false;
     }
     if (colideX && colideY && !(character1.isColided || character2.isColided)) {
-      console.log("hauhauhauhau");
+      console.log("burhhh");
       character1.isColided = true;
       character2.isColided = true;
       return true;
@@ -72,25 +85,45 @@ class Game {
 
   // updates the character, moves/jumps etc
   update(character) {
+    // console.log(character.y);
     if (this.pressedKeys.length == 0) {
-      LAYER_SPEED = 3;
-      this.moveToOrigin(this.player, this.player.origin());
+      // character.setSpriteSheet("hero-idle", 6);
+      // this.moveToOrigin(character, character.origin);
+      // LAYER_SPEED = 0;
+      if (!character.inAction) {
+        character.setSpriteSheet("hero-idle", 6);
+      }
     }
 
     this.colide(character);
 
     if (this.pressedKeys.indexOf("ArrowRight") > -1) {
+      character.setSpriteSheet("hero-run", 8);
       this.move(character, "right");
-      LAYER_SPEED = 5;
+      LAYER_SPEED = 4;
     }
     if (
       this.pressedKeys.indexOf("ArrowLeft") > -1 &&
       character.x >= character.origin().x
     ) {
       this.move(character, "left");
+      LAYER_SPEED = 0;
+      // this.setSpriteSheet("hero-run", 8);
     }
     if (this.pressedKeys.indexOf("ArrowUp") > -1 || character.inAir) {
+      character.setSpriteSheet("hero-run", 8);
       this.jump(character, character.origin());
+    }
+    if (this.pressedKeys.indexOf("Control") > -1) {
+      // this.move(character, "left");
+      LAYER_SPEED = 0;
+      this.strike("action1", character);
+      character.inAction = true;
+      console.log("jhjhhjfgdgdg");
+      setTimeout(() => {
+        character.inAction = false;
+        console.log("jhfjhf");
+      }, 550);
     }
   }
 
@@ -111,6 +144,8 @@ class Game {
     }
   }
 
+  //  needs improvement, but doable for now.
+  //  origin -> origin coordinates of the character.
   jump(character, origin) {
     if (!character.inAir) {
       character.inAir = true;
@@ -131,6 +166,7 @@ class Game {
           : (character.falling = false);
       } else {
         // should run when the character has reached the threshold height/ peak point, i.e. jumpHeight -2.
+
         const speed =
           character.velocityY *
           (8 - (this.inAirHeight * 8) / character.jumpHeight);
@@ -142,6 +178,18 @@ class Game {
           character.falling = character.inAir = false;
         }
       }
+    }
+  }
+
+  // actionnnnn
+  strike(typeOfAction, character) {
+    switch (typeOfAction) {
+      case "action1":
+        character.setSpriteSheet("hero-sword1", 4);
+        break;
+
+      default:
+        break;
     }
   }
 
@@ -162,7 +210,7 @@ class Game {
   }
 
   generateObstacle() {
-    if (Math.random() > 0.99) {
+    if (Math.random() > 0.995) {
       const powerUp = new PowerUp();
       this.powerUps.push(powerUp);
     }
@@ -189,34 +237,30 @@ class PowerLevel {
 }
 
 class Player {
-  constructor(spriteSheetId, numberOfFrames) {
-    this.velocityX = 0.5;
+  constructor() {
+    this.velocityX = 0;
     this.velocityY = 2;
     this.gravity = 4;
     this.jumpHeight = 150;
     this.inAir = false;
     this.falling = false;
     this.isColided = false;
+    this.inAction = false;
+    this.characterWidth = 40; //hero's actual width
 
-    this.spriteSheet = document.getElementById(spriteSheetId);
-    // console.log(this.spriteSheet);
+    this.setSpriteSheet("hero-idle", 6);
 
-    // spriteSheet dimentions
-    this.spriteWidth = this.spriteSheet.width;
-    this.spriteHeight = this.spriteSheet.height;
-    this.height = this.spriteHeight;
+    this.x = 100;
+    this.y = HERO_HEIGHT;
 
-    this.numberOfFrames = numberOfFrames;
-
-    this.timePerFrame = 100;
-
-    // single frame/sprite width; height is same as spriteHeight
-    this.frameWidth = this.spriteWidth / this.numberOfFrames;
-    this.width = this.frameWidth;
-
-    // x and y at which the image is to be placed
-    this.x = 50;
-    this.y = CANVAS_HEIGHT - BASE_HEIGHT - this.spriteHeight;
+    // character cordinates
+    // character width and cordinates of the character -> colidation in x-axis works by detecting if the 2nd object is between 1st object's
+    // first and second point in the x-axis (x and x+object's width), but the the character.width is actually the
+    // width of a single frame from the spriteSheet. so to make funtion work correctly,
+    // we need to add margin (half of the character's width) to the center point of the frame (character.width).
+    // hence, character's cordinates -> (character.x + character.width/2 - character.character.width/2 , character.x + character.width/2 + character.character.width/2)
+    this.colideX1 = this.x + this.width / 2 - this.characterWidth / 2;
+    this.colideX2 = this.x + this.width / 2 + this.characterWidth / 2;
 
     // size at which the spriteSheet is to be clipped (dimention of the character in the spritesheet)
     this.clippingX = 0;
@@ -225,6 +269,26 @@ class Player {
     // variable to keep track of the last update frame
     this.lastUpdate = Date.now();
     this.playerFrameIndex = 0;
+  }
+
+  setSpriteSheet(spriteSheetId, numberOfFrames) {
+    HERO_SPRITE_HEIGHT = 88;
+    if (spriteSheetId == "hero-sword1") {
+      HERO_SPRITE_HEIGHT = 128;
+    }
+    this.spriteSheet = document.getElementById(spriteSheetId);
+
+    this.timePerFrame = 100;
+
+    // spriteSheet dimentions
+    this.spriteWidth = this.spriteSheet.width;
+    this.spriteHeight = this.spriteSheet.height;
+    this.height = this.spriteSheet.height;
+    console.log(this.height);
+    // single frame/sprite width; height is same as spriteHeight
+    this.numberOfFrames = numberOfFrames;
+    this.frameWidth = this.spriteWidth / this.numberOfFrames;
+    this.width = this.frameWidth;
   }
 
   update() {
@@ -242,7 +306,7 @@ class Player {
   origin() {
     return {
       x: 50,
-      y: CANVAS_HEIGHT - BASE_HEIGHT - this.spriteHeight,
+      y: HERO_HEIGHT,
     };
   }
 }
@@ -254,6 +318,7 @@ class PowerUp {
   constructor() {
     this.radius = 8 * (1 + Math.random());
     this.color = "#52b788";
+    this.width = this.height = this.radius * 2;
     this.x = CANVAS_WIDTH + 8;
     this.y =
       CANVAS_HEIGHT - (8 + BASE_HEIGHT + (200 - BASE_HEIGHT) * Math.random());
