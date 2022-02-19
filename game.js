@@ -86,8 +86,7 @@ class Game {
   update(character) {
     // console.log(character.y);
     if (this.pressedKeys.length == 0) {
-      // character.setSpriteSheet("hero-idle", 6);
-      // this.moveToOrigin(character, character.origin);
+      character.isRunning = false;
       LAYER_SPEED = 0;
       if (!character.inAction) {
         character.setSpriteSheet("hero-idle", 6);
@@ -98,33 +97,38 @@ class Game {
 
     this.colide(character);
 
-    if (this.pressedKeys.indexOf("ArrowRight") > -1) {
-      character.setSpriteSheet("hero-run", 8);
-      this.move(character, "right");
-      LAYER_SPEED = LAYER_SPEED_DEFAULT;
+    // cant run/jump while performing an action move
+    if (!character.inAction) {
+      if (this.pressedKeys.indexOf("ArrowRight") > -1) {
+        character.setSpriteSheet("hero-run", 8);
+        this.move(character, "right");
+        LAYER_SPEED = LAYER_SPEED_DEFAULT;
+      }
+      if (
+        this.pressedKeys.indexOf("ArrowLeft") > -1 &&
+        character.x >= character.origin().x
+      ) {
+        this.move(character, "left");
+        LAYER_SPEED = 0;
+        // this.setSpriteSheet("hero-run", 8);
+      }
+      if (this.pressedKeys.indexOf("ArrowUp") > -1 || character.inAir) {
+        character.setSpriteSheet("hero-run", 8);
+        this.jump(character, character.origin());
+      }
     }
-    if (
-      this.pressedKeys.indexOf("ArrowLeft") > -1 &&
-      character.x >= character.origin().x
-    ) {
-      this.move(character, "left");
-      LAYER_SPEED = 0;
-      // this.setSpriteSheet("hero-run", 8);
-    }
-    if (this.pressedKeys.indexOf("ArrowUp") > -1 || character.inAir) {
-      character.setSpriteSheet("hero-run", 8);
-      this.jump(character, character.origin());
-    }
-    if (this.pressedKeys.indexOf("Control") > -1) {
-      // this.move(character, "left");
-      character.inAction = true;
-      LAYER_SPEED = 0;
-      this.strike("action1", character);
 
-      setTimeout(() => {
-        character.inAction = false;
-        character.y = HERO_HEIGHT;
-      }, 3000);
+    // action - sword moves, wont work while character is running, jumping (is inAir) or performing another action move
+    if (!character.inAction && !character.isRunning && !character.inAir) {
+      if (this.pressedKeys.indexOf("Control") > -1) {
+        this.strike("action1", character);
+      }
+      if (this.pressedKeys.indexOf("Alt") > -1) {
+        this.strike("action2", character);
+      }
+      if (this.pressedKeys.indexOf("Shift") > -1) {
+        this.strike("action3", character);
+      }
     }
   }
 
@@ -132,6 +136,7 @@ class Game {
   // character = {x: , y: , ...}
   // direction -> string with either of two values - "left" or "right"
   move(character, direction) {
+    character.isRunning = true;
     switch (direction) {
       case "right":
         character.x += character.velocityX;
@@ -185,14 +190,26 @@ class Game {
 
   // actionnnnn
   strike(typeOfAction, character) {
+    character.inAction = true;
+    LAYER_SPEED = 0;
     switch (typeOfAction) {
       case "action1":
         character.setSpriteSheet("hero-sword1", 4);
         break;
-
+      case "action2":
+        character.setSpriteSheet("hero-sword2", 4);
+        break;
+      case "action3":
+        character.setSpriteSheet("hero-sword3", 4);
+        break;
       default:
         break;
     }
+    setTimeout(() => {
+      character.inAction = false;
+      character.y = HERO_HEIGHT;
+      character.setSpriteSheet("hero-idle", 6);
+    }, 780);
   }
 
   // character = {height: , width: , x: , y: , ...}
@@ -248,6 +265,7 @@ class Player {
     this.falling = false;
     this.isColided = false;
     this.inAction = false;
+    this.isRunning = false;
     this.characterWidth = 40; //hero's actual width
 
     this.setSpriteSheet("hero-idle", 6);
@@ -274,9 +292,13 @@ class Player {
   }
 
   setSpriteSheet(spriteSheetId, numberOfFrames) {
+    if (this.inAction || this.inAir) {
+      this.playerFrameIndex = 0;
+    }
+
     this.spriteSheet = document.getElementById(spriteSheetId);
 
-    this.timePerFrame = 100;
+    this.timePerFrame = (100 / numberOfFrames) * 6;
 
     // spriteSheet dimentions
     this.spriteWidth = this.spriteSheet.width;
@@ -325,7 +347,7 @@ class PowerUp {
     this.x = CANVAS_WIDTH + 8;
     this.y =
       CANVAS_HEIGHT - (8 + BASE_HEIGHT + (200 - BASE_HEIGHT) * Math.random());
-    this.velocityX = 2.5 * (1 + Math.random());
+    this.velocityX = (2.5 * (1 + Math.random()) * LAYER_SPEED) / 5;
     this.isColided = false;
   }
 }

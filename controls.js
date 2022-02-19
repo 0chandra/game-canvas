@@ -8,8 +8,11 @@ class Control {
         e.key == "ArrowRight" ||
         e.key == "ArrowLeft" ||
         e.key == "ArrowDown" ||
-        e.key == "Control"
+        e.key == "Control" ||
+        e.key == "Alt" ||
+        e.key == "Shift"
       ) {
+        e.preventDefault();
         if (this.keys.indexOf(e.key) == -1) {
           this.keys.push(e.key);
         }
@@ -22,8 +25,11 @@ class Control {
         e.key == "ArrowRight" ||
         e.key == "ArrowLeft" ||
         e.key == "ArrowDown" ||
-        e.key == "Control"
+        e.key == "Control" ||
+        e.key == "Alt" ||
+        e.key == "Shift"
       ) {
+        e.preventDefault();
         this.keys.splice(this.keys.indexOf(e.key), 1);
       }
     };
