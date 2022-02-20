@@ -84,7 +84,6 @@ class Game {
 
   // updates the character, moves/jumps etc
   update(character) {
-    // console.log(character.y);
     if (this.pressedKeys.length == 0) {
       character.isRunning = false;
       LAYER_SPEED = 0;
@@ -101,7 +100,7 @@ class Game {
     if (!character.inAction) {
       if (this.pressedKeys.indexOf("ArrowRight") > -1) {
         character.setSpriteSheet("hero-run", 8);
-        this.move(character, "right");
+        // this.move(character, "right");
         LAYER_SPEED = LAYER_SPEED_DEFAULT;
       }
       if (
@@ -191,6 +190,8 @@ class Game {
   // actionnnnn
   strike(typeOfAction, character) {
     character.inAction = true;
+    character.colideX1 = character.colideX1Default;
+    character.colideX2 = character.x + character.width;
     LAYER_SPEED = 0;
     switch (typeOfAction) {
       case "action1":
@@ -208,6 +209,8 @@ class Game {
     setTimeout(() => {
       character.inAction = false;
       character.y = HERO_HEIGHT;
+      character.colideX1 = character.colideX1Default;
+      character.colideX2 = character.colideX2Default;
       character.setSpriteSheet("hero-idle", 6);
     }, 780);
   }
@@ -225,7 +228,16 @@ class Game {
 
   updateObstacle() {
     this.generateObstacle();
-    this.powerUps.forEach((pu) => this.move(pu, "left"));
+    this.powerUps.forEach((pu, index) => {
+      if (pu.x < 0 || (pu.isColided && this.player.inAction)) {
+        pu.killIt();
+        if (pu.isDied) {
+          this.powerUps.splice(index, 1);
+        }
+      }
+      pu.update();
+      this.move(pu, "left");
+    });
   }
 
   generateObstacle() {
@@ -279,8 +291,11 @@ class Player {
     // width of a single frame from the spriteSheet. so to make funtion work correctly,
     // we need to add margin (half of the character's width) to the center point of the frame (character.width).
     // hence, character's cordinates -> (character.x + character.width/2 - character.character.width/2 , character.x + character.width/2 + character.character.width/2)
-    this.colideX1 = this.x + this.width / 2 - this.characterWidth / 2;
-    this.colideX2 = this.x + this.width / 2 + this.characterWidth / 2;
+    this.colideX1Default = this.x + this.width / 2 - this.characterWidth / 2;
+    this.colideX2Default = this.x + this.width / 2 + this.characterWidth / 2;
+
+    this.colideX1 = this.colideX1Default;
+    this.colideX2 = this.colideX2Default;
 
     // size at which the spriteSheet is to be clipped (dimention of the character in the spritesheet)
     this.clippingX = 0;
@@ -343,12 +358,25 @@ class PowerUp {
   constructor() {
     this.radius = 8 * (1 + Math.random());
     this.color = "#52b788";
+    this.isKillable = true;
     this.width = this.height = this.radius * 2;
     this.x = CANVAS_WIDTH + 8;
     this.y =
       CANVAS_HEIGHT - (8 + BASE_HEIGHT + (200 - BASE_HEIGHT) * Math.random());
-    this.velocityX = (2.5 * (1 + Math.random()) * LAYER_SPEED) / 5;
+
+    this.defaultVelocityX = 2.5 * (1 + Math.random());
+    this.velocityX = this.defaultVelocityX;
     this.isColided = false;
+    this.isDied = false;
+  }
+  update() {
+    this.velocityX = this.defaultVelocityX + LAYER_SPEED;
+  }
+  killIt() {
+    this.radius -= 1.2;
+    if (this.radius < 1) {
+      this.isDied = true;
+    }
   }
 }
 
