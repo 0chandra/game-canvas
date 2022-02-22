@@ -16,6 +16,7 @@ class Game {
     this.pressedKeys = pressedKeys;
     this.inAirHeight = 0;
     this.powerUps = [];
+    this.enemies = { generateEnemy: true, enemyArray: [] };
 
     this.player = new Player();
   }
@@ -157,7 +158,6 @@ class Game {
       this.inAirHeight = 0;
     } else {
       if (!character.falling) {
-        console.log(character.y);
         // speed at which the character should jump in the upward directions, higher the character is in the air slower it gets, due to gravity. the velocity reduces.
         const speed =
           character.velocityY *
@@ -226,6 +226,29 @@ class Game {
     }
   }
 
+  updateEnemies() {
+    if (this.enemies.generateEnemy) {
+      setInterval(() => {
+        this.generateEnemy();
+      }, 4000 + 2000 * Math.random());
+    }
+    this.enemies.generateEnemy = false;
+    this.enemies.enemyArray.forEach((enemy, index) => {
+      if (enemy.isDied) {
+        this.enemies.enemyArray.splice(index, 1);
+        return;
+      }
+      enemy.velocityX = enemy.defaultVelocityX + LAYER_SPEED;
+      this.move(enemy, "left");
+      enemy.update();
+    });
+  }
+
+  generateEnemy() {
+    const enemy = Math.random() < 0.5 ? new Skeleton() : new Worm();
+    this.enemies.enemyArray.push(enemy);
+  }
+
   updateObstacle() {
     this.generateObstacle();
     this.powerUps.forEach((pu, index) => {
@@ -290,6 +313,24 @@ class Npc {
     this.lastUpdate = Date.now();
     this.playerFrameIndex = 0;
   }
+
+  setSpriteSheet(spriteSheetId, numberOfFrames) {
+    this.spriteSheet = document.getElementById(spriteSheetId);
+
+    this.timePerFrame = (100 / numberOfFrames) * 6;
+
+    // spriteSheet dimentions
+    this.spriteWidth = this.spriteSheet.width;
+    this.spriteHeight = this.spriteSheet.height;
+    this.height = this.spriteSheet.height;
+
+    // single frame/sprite width; height is same as spriteHeight
+    this.numberOfFrames = numberOfFrames;
+    this.frameWidth = this.spriteWidth / this.numberOfFrames;
+    this.width = this.frameWidth;
+    console.log("width", this.width);
+  }
+
   update() {
     if (Date.now() - this.lastUpdate >= this.timePerFrame) {
       this.clippingX = this.playerFrameIndex * this.frameWidth;
@@ -301,6 +342,11 @@ class Npc {
       }
       this.lastUpdate = Date.now();
     }
+  }
+
+  killIt() {
+    // this.setSpriteSheet()
+    this.isDied = true;
   }
 }
 
@@ -356,93 +402,41 @@ class Player extends Npc {
   }
 }
 
-// class Player {
-//   constructor() {
-//     this.velocityX = 0;
-//     this.velocityY = 2;
-//     this.gravity = 4;
-//     this.jumpHeight = 150;
-//     this.inAir = false;
-//     this.falling = false;
-//     this.isColided = false;
-//     this.inAction = false;
-//     this.isRunning = false;
-//     this.characterWidth = 40; //hero's actual width
-
-//     this.setSpriteSheet("hero-idle", 6);
-
-//     this.x = 100;
-//     this.y = HERO_HEIGHT;
-
-//     // character cordinates
-//     // character width and cordinates of the character -> colidation in x-axis works by detecting if the 2nd object is between 1st object's
-//     // first and second point in the x-axis (x and x+object's width), but the the character.width is actually the
-//     // width of a single frame from the spriteSheet. so to make funtion work correctly,
-//     // we need to add margin (half of the character's width) to the center point of the frame (character.width).
-//     // hence, character's cordinates -> (character.x + character.width/2 - character.character.width/2 , character.x + character.width/2 + character.character.width/2)
-//     this.colideX1Default = this.x + this.width / 2 - this.characterWidth / 2;
-//     this.colideX2Default = this.x + this.width / 2 + this.characterWidth / 2;
-
-//     this.colideX1 = this.colideX1Default;
-//     this.colideX2 = this.colideX2Default;
-
-//     // size at which the spriteSheet is to be clipped (dimention of the character in the spritesheet)
-//     this.clippingX = 0;
-//     this.clippingY = 0;
-
-//     // variable to keep track of the last update frame
-//     this.lastUpdate = Date.now();
-//     this.playerFrameIndex = 0;
-//   }
-
-//   setSpriteSheet(spriteSheetId, numberOfFrames) {
-//     if (this.inAction || this.inAir) {
-//       this.playerFrameIndex = 0;
-//     }
-
-//     this.spriteSheet = document.getElementById(spriteSheetId);
-
-//     this.timePerFrame = (100 / numberOfFrames) * 6;
-
-//     // spriteSheet dimentions
-//     this.spriteWidth = this.spriteSheet.width;
-//     this.spriteHeight = this.spriteSheet.height;
-//     this.height = this.spriteSheet.height;
-//     HERO_SPRITE_HEIGHT = this.height;
-//     if (this.inAction) {
-//       this.y = HERO_HEIGHT - 40;
-//     }
-
-//     // single frame/sprite width; height is same as spriteHeight
-//     this.numberOfFrames = numberOfFrames;
-//     this.frameWidth = this.spriteWidth / this.numberOfFrames;
-//     this.width = this.frameWidth;
-//   }
-
-//   update() {
-//     if (Date.now() - this.lastUpdate >= this.timePerFrame) {
-//       this.clippingX = this.playerFrameIndex * this.frameWidth;
-//       this.clippingY = this.spriteHeight;
-
-//       this.playerFrameIndex++;
-//       if (this.playerFrameIndex >= this.numberOfFrames) {
-//         this.playerFrameIndex = 0;
-//       }
-//       this.lastUpdate = Date.now();
-//     }
-//   }
-
-//   origin() {
-//     return {
-//       x: 50,
-//       y: HERO_HEIGHT,
-//     };
-//   }
-// }
-
-class Enemy extends Npc {
+class Worm extends Npc {
   constructor() {
-    super(4, 0, 0, CANVAS_WIDTH, BASE_HEIGHT);
+    super(1.4, 0.2, 0, CANVAS_WIDTH, CANVAS_HEIGHT - BASE_HEIGHT - 58);
+
+    this.defaultVelocityX = 1 + Math.random();
+    this.velocityX = this.defaultVelocityX;
+
+    this.setSpriteSheet("worm-walk", 9);
+
+    this.characterWidth = 52;
+
+    this.colideX1Default = this.x + this.width / 2 - this.characterWidth / 2;
+    this.colideX2Default = this.x + this.width / 2 + this.characterWidth / 2;
+
+    this.colideX1 = this.colideX1Default;
+    this.colideX2 = this.colideX2Default;
+  }
+}
+
+class Skeleton extends Npc {
+  constructor() {
+    super(1, 0.1, 0, CANVAS_WIDTH, CANVAS_HEIGHT - BASE_HEIGHT - 58);
+
+    this.defaultVelocityX = 1 + Math.random();
+    this.velocityX = this.defaultVelocityX;
+
+    this.setSpriteSheet("skeleton-walk", 4);
+
+    this.characterWidth = 52;
+
+    this.colideX1Default = this.x + this.width / 2 - this.characterWidth / 2;
+    this.colideX2Default = this.x + this.width / 2 + this.characterWidth / 2;
+
+    this.colideX1 = this.colideX1Default;
+    this.colideX2 = this.colideX2Default;
   }
 }
 

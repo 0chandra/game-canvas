@@ -39,14 +39,21 @@ window.onload = function () {
 
       game.player.update();
       game.update(game.player);
-      display.drawPlayer(ctx, game.player);
+      display.drawCharacter(ctx, game.player);
 
-      game.powerUps.forEach((pu) => {
-        display.drawObstacle(ctx, pu);
-        game.areColided(game.player, pu);
+      // game.powerUps.forEach((pu) => {
+      //   display.drawObstacle(ctx, pu);
+      //   game.areColided(game.player, pu);
+      //   game.player.isColided = false;
+      // });
+
+      game.enemies.enemyArray.forEach((enemy) => {
+        display.drawCharacter(ctx, enemy);
+        game.areColided(game.player, enemy);
         game.player.isColided = false;
       });
-      game.updateObstacle();
+
+      game.updateEnemies();
       // console.log("fps1", 1000 / (currentTime - lastUpdateTime));   -->> FPS counter
       lastUpdateTime = currentTime;
     }

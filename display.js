@@ -53,8 +53,7 @@ class Display {
     this.layer1.draw(context, 1);
   }
 
-  drawPlayer(context, playerObj) {
-    // console.log(playerObj);
+  drawCharacter(context, playerObj) {
     context.drawImage(
       playerObj.spriteSheet,
       playerObj.clippingX,
