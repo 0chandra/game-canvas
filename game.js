@@ -234,10 +234,13 @@ class Game {
     }
     this.enemies.generateEnemy = false;
     this.enemies.enemyArray.forEach((enemy, index) => {
-      if (enemy.isDied) {
-        this.enemies.enemyArray.splice(index, 1);
-        return;
+      if (enemy.isColided && this.player.inAction) {
+        enemy.killIt();
+        if (enemy.isDied) {
+          this.enemies.enemyArray.splice(index, 1);
+        }
       }
+
       enemy.velocityX = enemy.defaultVelocityX + LAYER_SPEED;
       this.move(enemy, "left");
       enemy.update();
@@ -291,7 +294,15 @@ class PowerLevel {
 }
 
 class Npc {
-  constructor(velX, velY, jumpHeight, x, y) {
+  constructor(
+    velX,
+    velY,
+    jumpHeight,
+    x,
+    y,
+    deathSpriteSheet,
+    numberOfFramesDeath
+  ) {
     this.velocityX = velX;
     this.velocityY = velY;
     this.gravity = GRAVITY;
@@ -301,6 +312,10 @@ class Npc {
     this.isColided = false;
     this.inAction = false;
     this.isRunning = false;
+
+    // death spriteSheet
+    this.deathSpriteSheet = deathSpriteSheet;
+    this.numberOfFramesDeath = numberOfFramesDeath;
 
     // / size at which the spriteSheet is to be clipped (dimention of the character in the spritesheet)
     this.clippingX = 0;
@@ -328,7 +343,6 @@ class Npc {
     this.numberOfFrames = numberOfFrames;
     this.frameWidth = this.spriteWidth / this.numberOfFrames;
     this.width = this.frameWidth;
-    console.log("width", this.width);
   }
 
   update() {
@@ -345,8 +359,13 @@ class Npc {
   }
 
   killIt() {
-    // this.setSpriteSheet()
-    this.isDied = true;
+    if (this.deathSpriteSheet) {
+      this.setSpriteSheet(this.deathSpriteSheet, this.numberOfFramesDeath);
+    }
+    if (this.playerFrameIndex >= this.numberOfFramesDeath - 1) {
+      console.log("lol");
+      this.isDied = true;
+    }
   }
 }
 
@@ -412,18 +431,20 @@ class Worm extends Npc {
     this.setSpriteSheet("worm-walk", 9);
 
     this.characterWidth = 52;
-
-    this.colideX1Default = this.x + this.width / 2 - this.characterWidth / 2;
-    this.colideX2Default = this.x + this.width / 2 + this.characterWidth / 2;
-
-    this.colideX1 = this.colideX1Default;
-    this.colideX2 = this.colideX2Default;
   }
 }
 
 class Skeleton extends Npc {
   constructor() {
-    super(1, 0.1, 0, CANVAS_WIDTH, CANVAS_HEIGHT - BASE_HEIGHT - 58);
+    super(
+      1,
+      0.1,
+      0,
+      CANVAS_WIDTH,
+      CANVAS_HEIGHT - BASE_HEIGHT - 58,
+      "skeleton-death",
+      4
+    );
 
     this.defaultVelocityX = 1 + Math.random();
     this.velocityX = this.defaultVelocityX;
@@ -431,12 +452,6 @@ class Skeleton extends Npc {
     this.setSpriteSheet("skeleton-walk", 4);
 
     this.characterWidth = 52;
-
-    this.colideX1Default = this.x + this.width / 2 - this.characterWidth / 2;
-    this.colideX2Default = this.x + this.width / 2 + this.characterWidth / 2;
-
-    this.colideX1 = this.colideX1Default;
-    this.colideX2 = this.colideX2Default;
   }
 }
 
