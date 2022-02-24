@@ -122,13 +122,13 @@ class Game {
     // action - sword moves, wont work while character is running, jumping (is inAir) or performing another action move
     if (!character.inAction && !character.isRunning && !character.inAir) {
       if (this.pressedKeys.indexOf("Control") > -1) {
-        this.strike("action1", character);
+        this.strike(character, "hero-sword1", 4);
       }
       if (this.pressedKeys.indexOf("Alt") > -1) {
-        this.strike("action2", character);
+        this.strike(character, "hero-sword2", 4);
       }
       if (this.pressedKeys.indexOf("Shift") > -1) {
-        this.strike("action3", character);
+        this.strike(character, "hero-sword3", 4);
       }
     }
   }
@@ -189,30 +189,27 @@ class Game {
   }
 
   // actionnnnn
-  strike(typeOfAction, character) {
+  strike(character, sprite, numberOfFrames) {
     character.inAction = true;
     character.colideX1 = character.colideX1Default;
     character.colideX2 = character.x + character.width;
     LAYER_SPEED = 0;
-    switch (typeOfAction) {
-      case "action1":
-        character.setSpriteSheet("hero-sword1", 4);
-        break;
-      case "action2":
-        character.setSpriteSheet("hero-sword2", 4);
-        break;
-      case "action3":
-        character.setSpriteSheet("hero-sword3", 4);
-        break;
-      default:
-        break;
-    }
+
+    // sets the sprite
+    character.setSpriteSheet(sprite, numberOfFrames);
+
+    // will change the spriteSheet back to default
     setTimeout(() => {
       character.inAction = false;
       character.y = HERO_HEIGHT;
       character.colideX1 = character.colideX1Default;
       character.colideX2 = character.colideX2Default;
-      character.setSpriteSheet("hero-idle", 6);
+
+      // error in below code
+      character.setSpriteSheet(
+        character.defaultSprite,
+        character.defaultSpriteFrameNumber
+      );
     }, 780);
   }
 
@@ -235,6 +232,10 @@ class Game {
     }
     this.enemies.generateEnemy = false;
     this.enemies.enemyArray.forEach((enemy, index) => {
+      if (this.player.origin().x + this.player.characterWidth + 50 > enemy.x) {
+        console.log("lolol");
+        this.strike(enemy, "skeleton-attack", 8);
+      }
       if (enemy.isColided && this.player.inAction) {
         enemy.takeDamage();
       }
@@ -291,7 +292,6 @@ class PowerLevel {
     ];
     this.x = this.radius * 2 + this.increament * this.playerLayers + x;
     this.y = y;
-    console.log("d;ksgjldfkghk");
   }
 }
 
@@ -321,8 +321,9 @@ class Npc {
     this.power = this.maxPower;
 
     this.defaultSprite = document.getElementById(defaultSprite);
-    this.width = defaultSprite.width / defaultSpriteFrameNumber;
-    this.setSpriteSheet(defaultSprite, defaultSpriteFrameNumber);
+    this.defaultSpriteFrameNumber = defaultSpriteFrameNumber;
+    this.width = defaultSprite.width / this.defaultSpriteFrameNumber;
+    this.setSpriteSheet(defaultSprite, this.defaultSpriteFrameNumber);
 
     // death spriteSheet
     this.deathSpriteSheet = deathSpriteSheet;
@@ -458,7 +459,9 @@ class Worm extends Npc {
       CANVAS_HEIGHT - BASE_HEIGHT - 58,
       1,
       "worm-walk",
-      9
+      9,
+      "worm-death",
+      8
     );
 
     this.defaultVelocityX = 1 + Math.random();
@@ -489,15 +492,6 @@ class Skeleton extends Npc {
     this.velocityX = this.defaultVelocityX;
 
     this.characterWidth = 52;
-
-    // this.colideX1Default = this.x + this.width / 2 - this.characterWidth / 2;
-    // this.colideX2Default = this.x + this.width / 2 + this.characterWidth / 2;
-    // console.log("skeleton", this.colideX2Default);
-
-    // this.colideX1 = this.colideX1Default;
-    // this.colideX2 = this.colideX2Default;
-
-    // this.setSpriteSheet("skeleton-walk", 4);
   }
 }
 
