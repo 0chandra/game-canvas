@@ -54,6 +54,8 @@ window.onload = function () {
       });
 
       game.updateEnemies();
+
+      display.drawPowerLevel(ctx, game.powerLevel);
       // console.log("fps1", 1000 / (currentTime - lastUpdateTime));   -->> FPS counter
       lastUpdateTime = currentTime;
     }

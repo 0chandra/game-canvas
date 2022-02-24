@@ -19,6 +19,7 @@ class Game {
     this.enemies = { generateEnemy: true, enemyArray: [] };
 
     this.player = new Player();
+    this.powerLevel = new PowerLevel(5, 50, 50);
   }
   // colider detector, detects colidation with the borders of the game. (excluding the margin at the bottom - ground)
   colide(character) {
@@ -43,7 +44,7 @@ class Game {
     let colideX;
     let colideY;
 
-    // checking if colide cordinates exists or not (to know what colide cordinates are, read comment in Player() Class)
+    // checking if colide cordinates exists or not (to know what colide cordinates are, read comment in Npc() Class -> update() function)
     const character1_x1 = character1.colideX1
       ? character1.colideX1
       : character1.x;
@@ -235,10 +236,10 @@ class Game {
     this.enemies.generateEnemy = false;
     this.enemies.enemyArray.forEach((enemy, index) => {
       if (enemy.isColided && this.player.inAction) {
-        enemy.killIt();
-        if (enemy.isDied) {
-          this.enemies.enemyArray.splice(index, 1);
-        }
+        enemy.takeDamage();
+      }
+      if (enemy.x < 0) {
+        this.enemies.enemyArray.splice(index, 1);
       }
 
       enemy.velocityX = enemy.defaultVelocityX + LAYER_SPEED;
@@ -290,6 +291,7 @@ class PowerLevel {
     ];
     this.x = this.radius * 2 + this.increament * this.playerLayers + x;
     this.y = y;
+    console.log("d;ksgjldfkghk");
   }
 }
 
@@ -300,6 +302,9 @@ class Npc {
     jumpHeight,
     x,
     y,
+    maxPower,
+    defaultSprite,
+    defaultSpriteFrameNumber,
     deathSpriteSheet,
     numberOfFramesDeath
   ) {
@@ -312,6 +317,12 @@ class Npc {
     this.isColided = false;
     this.inAction = false;
     this.isRunning = false;
+    this.maxPower = maxPower;
+    this.power = this.maxPower;
+
+    this.defaultSprite = document.getElementById(defaultSprite);
+    this.width = defaultSprite.width / defaultSpriteFrameNumber;
+    this.setSpriteSheet(defaultSprite, defaultSpriteFrameNumber);
 
     // death spriteSheet
     this.deathSpriteSheet = deathSpriteSheet;
@@ -346,9 +357,27 @@ class Npc {
   }
 
   update() {
+    // character cordinates
+    // character width and cordinates of the character -> colidation in x-axis works by detecting if the 2nd object is between 1st object's
+    // first and second point in the x-axis (x and x+object's width), but the the character.width is actually the
+    // width of a single frame from the spriteSheet. so to make funtion work correctly,
+    // we need to add margin (half of the character's width) to the center point of the frame (character.width).
+    // hence, character's cordinates -> (character.x + character.width/2 - character.character.width/2 , character.x + character.width/2 + character.character.width/2)
+
+    this.colideX1Default = this.x + this.width / 2 - this.characterWidth / 2;
+    this.colideX2Default = this.x + this.width / 2 + this.characterWidth / 2;
+
+    this.colideX1 = this.colideX1Default;
+    this.colideX2 = this.colideX2Default;
+
+    // <<<<----->>>
     if (Date.now() - this.lastUpdate >= this.timePerFrame) {
       this.clippingX = this.playerFrameIndex * this.frameWidth;
       this.clippingY = this.spriteHeight;
+
+      if (this.isDied) {
+        return;
+      }
 
       this.playerFrameIndex++;
       if (this.playerFrameIndex >= this.numberOfFrames) {
@@ -358,33 +387,31 @@ class Npc {
     }
   }
 
+  takeDamage() {
+    this.isColided = false;
+    console.log(this.power);
+    if (this.power < 1) {
+      this.killIt();
+      return;
+    }
+    this.power--;
+  }
+
   killIt() {
     if (this.deathSpriteSheet) {
       this.setSpriteSheet(this.deathSpriteSheet, this.numberOfFramesDeath);
     }
     if (this.playerFrameIndex >= this.numberOfFramesDeath - 1) {
-      console.log("lol");
       this.isDied = true;
+      this.defaultVelocityX = 0;
     }
   }
 }
 
 class Player extends Npc {
   constructor() {
-    super(0, 2, 150, 100, HERO_HEIGHT);
+    super(0, 2, 150, 100, HERO_HEIGHT, 10, "hero-idle", 6);
     this.characterWidth = 40; //hero's actual width
-
-    // character cordinates
-    // character width and cordinates of the character -> colidation in x-axis works by detecting if the 2nd object is between 1st object's
-    // first and second point in the x-axis (x and x+object's width), but the the character.width is actually the
-    // width of a single frame from the spriteSheet. so to make funtion work correctly,
-    // we need to add margin (half of the character's width) to the center point of the frame (character.width).
-    // hence, character's cordinates -> (character.x + character.width/2 - character.character.width/2 , character.x + character.width/2 + character.character.width/2)
-    this.colideX1Default = this.x + this.width / 2 - this.characterWidth / 2;
-    this.colideX2Default = this.x + this.width / 2 + this.characterWidth / 2;
-
-    this.colideX1 = this.colideX1Default;
-    this.colideX2 = this.colideX2Default;
 
     this.setSpriteSheet("hero-idle", 6);
   }
@@ -423,12 +450,21 @@ class Player extends Npc {
 
 class Worm extends Npc {
   constructor() {
-    super(1.4, 0.2, 0, CANVAS_WIDTH, CANVAS_HEIGHT - BASE_HEIGHT - 58);
+    super(
+      1.4,
+      0.2,
+      0,
+      CANVAS_WIDTH,
+      CANVAS_HEIGHT - BASE_HEIGHT - 58,
+      1,
+      "worm-walk",
+      9
+    );
 
     this.defaultVelocityX = 1 + Math.random();
     this.velocityX = this.defaultVelocityX;
 
-    this.setSpriteSheet("worm-walk", 9);
+    // this.setSpriteSheet("worm-walk", 9);
 
     this.characterWidth = 52;
   }
@@ -442,6 +478,9 @@ class Skeleton extends Npc {
       0,
       CANVAS_WIDTH,
       CANVAS_HEIGHT - BASE_HEIGHT - 58,
+      2,
+      "skeleton-walk",
+      4,
       "skeleton-death",
       4
     );
@@ -449,9 +488,16 @@ class Skeleton extends Npc {
     this.defaultVelocityX = 1 + Math.random();
     this.velocityX = this.defaultVelocityX;
 
-    this.setSpriteSheet("skeleton-walk", 4);
-
     this.characterWidth = 52;
+
+    // this.colideX1Default = this.x + this.width / 2 - this.characterWidth / 2;
+    // this.colideX2Default = this.x + this.width / 2 + this.characterWidth / 2;
+    // console.log("skeleton", this.colideX2Default);
+
+    // this.colideX1 = this.colideX1Default;
+    // this.colideX2 = this.colideX2Default;
+
+    // this.setSpriteSheet("skeleton-walk", 4);
   }
 }
 
