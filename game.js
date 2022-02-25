@@ -19,7 +19,7 @@ class Game {
     this.enemies = { generateEnemy: true, enemyArray: [] };
 
     this.player = new Player();
-    this.powerLevel = new PowerLevel(5, 50, 50);
+    this.powerLevel = new PowerLevel(15, 100, 50);
   }
   // colider detector, detects colidation with the borders of the game. (excluding the margin at the bottom - ground)
   colide(character) {
@@ -89,8 +89,11 @@ class Game {
     if (this.pressedKeys.length == 0) {
       character.isRunning = false;
       LAYER_SPEED = 0;
-      if (!character.inAction) {
-        character.setSpriteSheet("hero-idle", 6);
+      if (!character.inAction && character.power > 0) {
+        character.setSpriteSheet(
+          character.defaultSprite,
+          character.defaultSpriteFrameNumber
+        );
         // character.y = HERO_HEIGHT;
         this.moveToOrigin(character, character.origin);
       }
@@ -99,7 +102,7 @@ class Game {
     this.colide(character);
 
     // cant run/jump while performing an action move
-    if (!character.inAction) {
+    if (!character.inAction && character.power > 0) {
       if (this.pressedKeys.indexOf("ArrowRight") > -1) {
         character.setSpriteSheet("hero-run", 8);
         // this.move(character, "right");
@@ -204,6 +207,7 @@ class Game {
     // will change the spriteSheet back to default
     setTimeout(() => {
       character.inAction = false;
+      character.hasDealtBlow = false;
       character.y = character.defaultHeight; //HERO-HEIGHT
       character.colideX1 = character.colideX1Default;
       character.colideX2 = character.colideX2Default;
@@ -242,13 +246,19 @@ class Game {
         this.player.colideX2Default > enemy.x &&
         this.player.colideX1Default < enemy.x
       ) {
-        console.log("lolol");
-        this.strike(enemy, "skeleton-attack", 8);
+        if (!enemy.inAction) {
+          this.strike(enemy, "skeleton-attack", 8);
+        }
       }
       if (enemy.isColided && this.player.inAction) {
         enemy.takeDamage();
       }
-      if (enemy.x < 0) {
+      if (enemy.inAction && !enemy.hasDealtBlow) {
+        console.log("bruhhh");
+        this.player.takeDamage();
+        enemy.hasDealtBlow = true;
+      }
+      if (enemy.x + enemy.characterWidth < 0) {
         this.enemies.enemyArray.splice(index, 1);
       }
 

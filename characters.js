@@ -19,6 +19,7 @@ class Npc {
     this.isColided = false;
     this.inAction = false;
     this.isRunning = false;
+    this.hasDealtBlow = false;
     this.maxPower = maxPower;
     this.power = this.maxPower;
 
@@ -112,15 +113,15 @@ class Npc {
       this.setSpriteSheet(this.deathSpriteSheet, this.numberOfFramesDeath);
     }
     if (this.playerFrameIndex >= this.numberOfFramesDeath - 1) {
-      this.isDied = true;
       this.defaultVelocityX = 0;
+      this.isDied = true;
     }
   }
 }
 
 class Player extends Npc {
   constructor() {
-    super(0, 2, 150, 100, 10, "hero-idle", 6);
+    super(0, 2, 150, 100, 2, "hero-idle", 6, "hero-death", 9);
     this.characterWidth = 40; //hero's actual width
 
     this.setSpriteSheet("hero-idle", 6);
