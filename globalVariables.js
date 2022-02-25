@@ -12,7 +12,6 @@ const TIME_PER_FRAME = 1000 / 45; //idk why but '45' gives me frame rate at 30 f
 
 // these should not be global variables, will put them somewhere more appropriate
 let HERO_SPRITE_HEIGHT = 88;
-const HERO_HEIGHT = CANVAS_HEIGHT - BASE_HEIGHT - HERO_SPRITE_HEIGHT;
 
 // number of frames per spriteSheet
 // run -> 8
