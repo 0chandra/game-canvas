@@ -99,6 +99,11 @@ class Display {
     context.lineWidth = 2;
     context.stroke();
   }
+  drawText(context, textObj) {
+    context.font = `${textObj.fontSize} ${textObj.font}`;
+    context.fillStyle = textObj.color;
+    context.fillText(textObj.content, textObj.x, textObj.y);
+  }
 }
 
 class ParallaxLayer {

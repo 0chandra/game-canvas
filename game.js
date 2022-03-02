@@ -293,4 +293,15 @@ class Game {
       this.powerUps.push(powerUp);
     }
   }
+
+  score(x, y) {
+    return {
+      font: "monospace",
+      fontSize: "30px",
+      content: this.player.power,
+      color: "black",
+      x: x,
+      y: y,
+    };
+  }
 }
