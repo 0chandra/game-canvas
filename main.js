@@ -53,6 +53,11 @@ window.onload = function () {
         game.player.isColided = false;
       });
 
+      game.attacks.forEach((attack) => {
+        display.drawCharacter(ctx, attack);
+        attack.update();
+      });
+
       game.updateEnemies();
       display.drawText(ctx, game.score(30, 40));
 

@@ -8,7 +8,8 @@ class Npc {
     defaultSprite,
     defaultSpriteFrameNumber,
     deathSpriteSheet,
-    numberOfFramesDeath
+    numberOfFramesDeath,
+    canAttackAirBorne = false
   ) {
     this.velocityX = velX;
     this.velocityY = velY;
@@ -22,6 +23,7 @@ class Npc {
     this.hasDealtBlow = false;
     this.maxPower = maxPower;
     this.power = this.maxPower;
+    this.canAttackAirBorne = canAttackAirBorne;
 
     this.defaultSprite = defaultSprite;
     this.defaultSpriteFrameNumber = defaultSpriteFrameNumber;
@@ -51,7 +53,7 @@ class Npc {
     this.playerFrameIndex = 0;
   }
 
-  setSpriteSheet(spriteSheetId, numberOfFrames) {
+  setSpriteSheet(spriteSheetId, numberOfFrames, callBack, frames) {
     this.spriteSheet = document.getElementById(spriteSheetId);
 
     this.timePerFrame = (100 / numberOfFrames) * 6;
@@ -65,6 +67,16 @@ class Npc {
     this.numberOfFrames = numberOfFrames;
     this.frameWidth = this.spriteWidth / this.numberOfFrames;
     this.width = this.frameWidth;
+
+    if (this.playerFrameIndex > frames - 1) {
+      console.log("naaaahhhh");
+      callBack();
+    }
+  }
+
+  setDefaultSprite() {
+    this.setSpriteSheet(this.defaultSprite, this.defaultSpriteFrameNumber);
+    console.log("burrhriherhjesfdsjhgfjh");
   }
 
   update() {
@@ -163,11 +175,13 @@ class Player extends Npc {
 
 class Worm extends Npc {
   constructor() {
-    super(1.4, 0.2, 0, CANVAS_WIDTH, 1, "worm-walk", 9, "worm-death", 8);
+    super(1.4, 0.2, 0, CANVAS_WIDTH, 1, "worm-walk", 9, "worm-death", 8, true);
 
     this.defaultVelocityX = 1 + Math.random();
     this.velocityX = this.defaultVelocityX;
 
+    this.airAttackSprite = { spriteSheet: "fireball", numberOfFrames: "6" };
+    this.attackSprite = { spriteSheet: "worm-attack", numberOfFrames: "16" };
     // this.setSpriteSheet("worm-walk", 9);
 
     this.characterWidth = 52;
@@ -235,4 +249,21 @@ class PowerLevel {
 
 class obstacles {
   // benign limitations
+}
+
+class AirBorneAttack {
+  constructor(x, y, spriteSheet, numberOfFrames) {
+    this.x = x;
+    this.y = y;
+    this.velocityX = 5 + 2 * Math.random();
+    this.inAir = false;
+    this.isColided = false;
+    this.inAction = false;
+    this.hasDealtBlow = false;
+    this.spriteSheet = spriteSheet;
+    this.numberOfFrames = numberOfFrames;
+  }
+  update() {
+    this.x += this.velocityX;
+  }
 }

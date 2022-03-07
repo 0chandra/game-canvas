@@ -17,6 +17,7 @@ class Game {
     this.inAirHeight = 0;
     this.powerUps = [];
     this.enemies = { generateEnemy: true, enemyArray: [] };
+    this.attacks = []; //only airborne attacks
 
     this.player = new Player();
     this.powerLevel = new PowerLevel(15, 100, 50);
@@ -223,6 +224,37 @@ class Game {
     }, 780);
   }
 
+  // airborne attacks
+  attack(character, sprite, numberOfFrames) {
+    if (character.power < 1) {
+      return;
+    }
+    const setAttack = function () {
+      console.log("bruhdskjghfdskjghkjhkjhkjh");
+      const attack = new AirBorneAttack(
+        this.x,
+        this.y,
+        this.airAttackSprite.spriteSheet,
+        this.airAttackSprite.numberOfFrames
+      );
+
+      // this.attacks.push(attack);
+      this.setDefaultSprite();
+      this.inAction = false;
+    };
+    const lol = setAttack.bind(character);
+    //
+    if (!character.inAction) {
+      character.inAction = true;
+      character.setSpriteSheet(
+        sprite,
+        numberOfFrames,
+        lol,
+        character.airAttackSprite.numberOfFrames
+      );
+    }
+  }
+
   // character = {height: , width: , x: , y: , ...}
   // origin = {x: , y:}
   moveToOrigin(character, origin) {
@@ -260,6 +292,15 @@ class Game {
       }
       if (enemy.x + enemy.characterWidth < 0) {
         this.enemies.enemyArray.splice(index, 1);
+      }
+      if (enemy.canAttackAirBorne && !enemy.inAction) {
+        if (4 * Math.random() > 3.92 && !enemy.inAction) {
+          this.attack(
+            enemy,
+            enemy.attackSprite.spriteSheet,
+            enemy.attackSprite.numberOfFrames
+          );
+        }
       }
 
       enemy.velocityX = enemy.defaultVelocityX + LAYER_SPEED;
