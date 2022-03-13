@@ -31,6 +31,28 @@ window.onload = function () {
   const timePerFrame = TIME_PER_FRAME;
 
   const loop = function () {
+    if (game.pause) {
+      display.drawBackground(
+        ctx,
+        CANVAS_HEIGHT,
+        CANVAS_WIDTH,
+        "rgba(0, 0, 0, 0.3)"
+      );
+      display.drawText(ctx, {
+        font: "monospace",
+        fontSize: "30px",
+        content: "oooops",
+        color: "red",
+        x: CANVAS_WIDTH / 2,
+        y: CANVAS_HEIGHT / 2,
+      });
+      return;
+    }
+    if (game.player.isDied) {
+      setTimeout(() => {
+        game.pause = true;
+      }, 250);
+    }
     const currentTime = Date.now();
     if (currentTime - lastUpdateTime >= timePerFrame) {
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -53,9 +75,17 @@ window.onload = function () {
         game.player.isColided = false;
       });
 
-      game.attacks.forEach((attack) => {
+      game.attacks.forEach((attack, index) => {
         display.drawCharacter(ctx, attack);
         attack.update();
+        attack.x -= attack.velocityX + LAYER_SPEED;
+        if (game.areColided(game.player, attack)) {
+          if (!attack.hasDealtBlow) {
+            game.player.power--;
+            game.attacks.slice(index, 1);
+            game.player.isColided = false;
+          }
+        }
       });
 
       game.updateEnemies();

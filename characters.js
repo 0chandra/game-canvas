@@ -9,7 +9,10 @@ class Npc {
     defaultSpriteFrameNumber,
     deathSpriteSheet,
     numberOfFramesDeath,
-    canAttackAirBorne = false
+    canAttackAirBorne = false,
+    canStrike = false,
+    strikeSpriteSheet = null,
+    strikeNumberOfFrames = null
   ) {
     this.velocityX = velX;
     this.velocityY = velY;
@@ -24,6 +27,9 @@ class Npc {
     this.maxPower = maxPower;
     this.power = this.maxPower;
     this.canAttackAirBorne = canAttackAirBorne;
+    this.canStrike = canStrike;
+    this.strikeSpriteSheet = strikeSpriteSheet;
+    this.strikeNumberOfFrames = strikeNumberOfFrames;
 
     this.defaultSprite = defaultSprite;
     this.defaultSpriteFrameNumber = defaultSpriteFrameNumber;
@@ -53,7 +59,7 @@ class Npc {
     this.playerFrameIndex = 0;
   }
 
-  setSpriteSheet(spriteSheetId, numberOfFrames, callBack, frames) {
+  setSpriteSheet(spriteSheetId, numberOfFrames) {
     this.spriteSheet = document.getElementById(spriteSheetId);
 
     this.timePerFrame = (100 / numberOfFrames) * 6;
@@ -67,11 +73,6 @@ class Npc {
     this.numberOfFrames = numberOfFrames;
     this.frameWidth = this.spriteWidth / this.numberOfFrames;
     this.width = this.frameWidth;
-
-    if (this.playerFrameIndex > frames - 1) {
-      console.log("naaaahhhh");
-      callBack();
-    }
   }
 
   setDefaultSprite() {
@@ -108,6 +109,16 @@ class Npc {
       }
       this.lastUpdate = Date.now();
     }
+
+    if (this.power < 1) {
+      if (this.deathSpriteSheet && !this.isDied) {
+        this.setSpriteSheet(this.deathSpriteSheet, this.numberOfFramesDeath);
+      }
+      if (this.playerFrameIndex >= this.numberOfFramesDeath - 1) {
+        this.defaultVelocityX = 0;
+        this.isDied = true;
+      }
+    }
   }
 
   takeDamage() {
@@ -115,27 +126,13 @@ class Npc {
       this.isColided = false;
       console.log(this.power);
       this.power--;
-      if (this.power < 1) {
-        this.killIt();
-        return;
-      }
-    }
-  }
-
-  killIt() {
-    if (this.deathSpriteSheet) {
-      this.setSpriteSheet(this.deathSpriteSheet, this.numberOfFramesDeath);
-    }
-    if (this.playerFrameIndex >= this.numberOfFramesDeath - 1) {
-      this.defaultVelocityX = 0;
-      this.isDied = true;
     }
   }
 }
 
 class Player extends Npc {
   constructor() {
-    super(0, 2, 150, 100, 10, "hero-idle", 6, "hero-death", 9);
+    super(0, 2, 150, 100, 2, "hero-idle", 6, "hero-death", 9);
     this.characterWidth = 40; //hero's actual width
 
     this.setSpriteSheet("hero-idle", 6);
@@ -175,7 +172,19 @@ class Player extends Npc {
 
 class Worm extends Npc {
   constructor() {
-    super(1.4, 0.2, 0, CANVAS_WIDTH, 1, "worm-walk", 9, "worm-death", 8, true);
+    super(
+      1.4,
+      0.2,
+      0,
+      CANVAS_WIDTH,
+      1,
+      "worm-walk",
+      9,
+      "worm-death",
+      8,
+      true,
+      false
+    );
 
     this.defaultVelocityX = 1 + Math.random();
     this.velocityX = this.defaultVelocityX;
@@ -190,7 +199,21 @@ class Worm extends Npc {
 
 class Skeleton extends Npc {
   constructor() {
-    super(1, 0.1, 0, CANVAS_WIDTH, 2, "skeleton-walk", 4, "skeleton-death", 4);
+    super(
+      1,
+      0.1,
+      0,
+      CANVAS_WIDTH,
+      2,
+      "skeleton-walk",
+      4,
+      "skeleton-death",
+      4,
+      false,
+      true,
+      "skeleton-attack",
+      8
+    );
 
     this.defaultVelocityX = 1 + Math.random();
     this.velocityX = this.defaultVelocityX;
@@ -251,8 +274,9 @@ class obstacles {
   // benign limitations
 }
 
-class AirBorneAttack {
+class AirBorneAttack extends Npc {
   constructor(x, y, spriteSheet, numberOfFrames) {
+    super(5 + 2 * Math.random(), 0, 0, x, 1, spriteSheet, numberOfFrames);
     this.x = x;
     this.y = y;
     this.velocityX = 5 + 2 * Math.random();
@@ -260,10 +284,5 @@ class AirBorneAttack {
     this.isColided = false;
     this.inAction = false;
     this.hasDealtBlow = false;
-    this.spriteSheet = spriteSheet;
-    this.numberOfFrames = numberOfFrames;
-  }
-  update() {
-    this.x += this.velocityX;
   }
 }

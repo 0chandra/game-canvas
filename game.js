@@ -15,6 +15,7 @@ class Game {
     this.gameWidth = gameWidth;
     this.pressedKeys = pressedKeys;
     this.inAirHeight = 0;
+    this.pause = false;
     this.powerUps = [];
     this.enemies = { generateEnemy: true, enemyArray: [] };
     this.attacks = []; //only airborne attacks
@@ -42,8 +43,8 @@ class Game {
   // returns -> true if they colide, false if not.
 
   areColided(character1, character2) {
-    let colideX;
-    let colideY;
+    let colideX = false;
+    let colideY = false;
 
     // checking if colide cordinates exists or not (to know what colide cordinates are, read comment in Npc() Class -> update() function)
     const character1_x1 = character1.colideX1
@@ -74,6 +75,7 @@ class Game {
       (character2.y > character1.y &&
         character2.y < character1.height + character1.y)
     ) {
+      // console.log("character2Height", character2.height);
       colideY = true;
     } else {
       return false;
@@ -81,6 +83,7 @@ class Game {
     if (colideX && colideY && !(character1.isColided || character2.isColided)) {
       character1.isColided = true;
       character2.isColided = true;
+      console.log("im innn im innn 2222313");
       return true;
     }
   }
@@ -192,7 +195,7 @@ class Game {
     }
   }
 
-  // actionnnnn
+  // sword moves
   strike(character, sprite, numberOfFrames) {
     if (character.power < 1) {
       return;
@@ -213,13 +216,13 @@ class Game {
       character.colideX1 = character.colideX1Default;
       character.colideX2 = character.colideX2Default;
 
-      // error in below code
       if (character.power > 1) {
         character.playerFrameIndex = 0;
         character.setSpriteSheet(
           character.defaultSprite,
           character.defaultSpriteFrameNumber
         );
+        character.inAction = false;
       }
     }, 780);
   }
@@ -229,30 +232,26 @@ class Game {
     if (character.power < 1) {
       return;
     }
-    const setAttack = function () {
-      console.log("bruhdskjghfdskjghkjhkjhkjh");
-      const attack = new AirBorneAttack(
-        this.x,
-        this.y,
-        this.airAttackSprite.spriteSheet,
-        this.airAttackSprite.numberOfFrames
-      );
 
-      // this.attacks.push(attack);
-      this.setDefaultSprite();
-      this.inAction = false;
-    };
-    const lol = setAttack.bind(character);
-    //
     if (!character.inAction) {
       character.inAction = true;
-      character.setSpriteSheet(
-        sprite,
-        numberOfFrames,
-        lol,
+      character.setSpriteSheet(sprite, numberOfFrames);
+    }
+
+    setTimeout(() => {
+      const attack = new AirBorneAttack(
+        character.x,
+        character.y + 10,
+        character.airAttackSprite.spriteSheet,
         character.airAttackSprite.numberOfFrames
       );
-    }
+
+      this.attacks.push(attack);
+      character.setDefaultSprite();
+      character.inAction = false;
+    }, 780);
+
+    //
   }
 
   // character = {height: , width: , x: , y: , ...}
@@ -278,15 +277,21 @@ class Game {
         this.player.colideX2Default > enemy.x &&
         this.player.colideX1Default < enemy.x
       ) {
-        if (!enemy.inAction) {
-          this.strike(enemy, "skeleton-attack", 8);
+        if (!enemy.inAction && enemy.canStrike) {
+          this.strike(
+            enemy,
+            enemy.strikeSpriteSheet,
+            enemy.strikeNumberOfFrames
+          );
         }
       }
+      // dealing damage, reducing power of the character
       if (enemy.isColided && this.player.inAction) {
         enemy.takeDamage();
+        // this.player.inAction = false;
       }
-      if (enemy.inAction && !enemy.hasDealtBlow) {
-        console.log("bruhhh");
+
+      if (enemy.inAction && !enemy.hasDealtBlow && enemy.isColided) {
         this.player.takeDamage();
         enemy.hasDealtBlow = true;
       }
@@ -294,7 +299,7 @@ class Game {
         this.enemies.enemyArray.splice(index, 1);
       }
       if (enemy.canAttackAirBorne && !enemy.inAction) {
-        if (4 * Math.random() > 3.92 && !enemy.inAction) {
+        if (4 * Math.random() > 3.95 && !enemy.inAction) {
           this.attack(
             enemy,
             enemy.attackSprite.spriteSheet,
