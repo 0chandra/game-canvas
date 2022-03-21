@@ -19,6 +19,13 @@ class Game {
     this.powerUps = [];
     this.enemies = { generateEnemy: true, enemyArray: [] };
     this.attacks = []; //only airborne attacks
+    this.pauseMenu = {
+      x: CANVAS_WIDTH - 40,
+      y: 40,
+      fontSize: "20",
+      backgroundColor: "rgb(0,0,0,.50)",
+      message: "Game Paused",
+    };
 
     this.player = new Player();
     this.powerLevel = new PowerLevel(15, 100, 50);
@@ -268,7 +275,9 @@ class Game {
   updateEnemies() {
     if (this.enemies.generateEnemy) {
       setInterval(() => {
-        this.generateEnemy();
+        if (!this.pause) {
+          this.generateEnemy();
+        }
       }, 4000 + 2000 * Math.random());
     }
     this.enemies.generateEnemy = false;

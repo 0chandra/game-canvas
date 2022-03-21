@@ -5,7 +5,6 @@
 // player gets killed instantly if got hit by the high level enemy.
 window.onload = function () {
   const canvas = document.getElementById("gameCanvas");
-  console.log(canvas);
 
   const ctx = canvas.getContext("2d");
 
@@ -27,47 +26,58 @@ window.onload = function () {
     // game.move(game.player);
   });
 
+  // checks if window/tab is minimized or not and set the state game.pause accordingly
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState == "hidden") {
+      game.pause = true;
+    }
+  });
+
+  // checks if user has clicked on pause icon, if yes -> changes game.pause state
+  canvas.addEventListener("click", (e) => {
+    const clickedX = e.clientX;
+    const clickedY = e.clientY;
+
+    const clickShape = game.pauseMenu;
+
+    if (
+      clickedX > clickShape.x - clickShape.fontSize / 2 &&
+      clickedX > clickShape.x &&
+      clickedY < clickShape.y + clickShape.fontSize / 2 &&
+      clickedY > clickShape.y - clickShape.fontSize
+    ) {
+      game.pause = !game.pause;
+      if (!game.pause) {
+        loop();
+      }
+    }
+  });
+
   let lastUpdateTime = Date.now();
   const timePerFrame = TIME_PER_FRAME;
 
   const loop = function () {
+    console.log(game.enemies.enemyArray);
     if (game.pause) {
-      display.drawBackground(
-        ctx,
-        CANVAS_HEIGHT,
-        CANVAS_WIDTH,
-        "rgba(0, 0, 0, 0.3)"
-      );
-      display.drawText(ctx, {
-        font: "monospace",
-        fontSize: "30px",
-        content: "oooops",
-        color: "red",
-        x: CANVAS_WIDTH / 2,
-        y: CANVAS_HEIGHT / 2,
-      });
+      display.drawPauseMenu(ctx, game.pauseMenu);
       return;
     }
     if (game.player.isDied) {
       setTimeout(() => {
+        game.pauseMenu.message = "You Ded, f5 to restart the game";
         game.pause = true;
       }, 250);
     }
     const currentTime = Date.now();
     if (currentTime - lastUpdateTime >= timePerFrame) {
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
       display.drawBackgroundParalax(ctx);
       // display.drawBackground(ctx, CANVAS_HEIGHT, CANVAS_WIDTH, "black");
 
       game.player.update();
       game.update(game.player);
       display.drawCharacter(ctx, game.player);
-
-      // game.powerUps.forEach((pu) => {
-      //   display.drawObstacle(ctx, pu);
-      //   game.areColided(game.player, pu);
-      //   game.player.isColided = false;
-      // });
 
       game.enemies.enemyArray.forEach((enemy) => {
         display.drawCharacter(ctx, enemy);
@@ -90,6 +100,7 @@ window.onload = function () {
 
       game.updateEnemies();
       display.drawText(ctx, game.score(30, 40));
+      display.drawMenu(ctx, game.pauseMenu);
 
       display.drawPowerLevel(ctx, game.powerLevel);
       // console.log("fps1", 1000 / (currentTime - lastUpdateTime));   -->> FPS counter

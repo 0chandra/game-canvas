@@ -132,7 +132,7 @@ class Npc {
 
 class Player extends Npc {
   constructor() {
-    super(0, 2, 150, 100, 2, "hero-idle", 6, "hero-death", 9);
+    super(0, 2, 150, 100, 10, "hero-idle", 6, "hero-death", 9);
     this.characterWidth = 40; //hero's actual width
 
     this.setSpriteSheet("hero-idle", 6);

@@ -103,6 +103,33 @@ class Display {
     context.font = `${textObj.fontSize} ${textObj.font}`;
     context.fillStyle = textObj.color;
     context.fillText(textObj.content, textObj.x, textObj.y);
+    context.textAlign = textObj.textAlign || "center";
+  }
+  drawPauseMenu(context, pauseObj) {
+    this.drawBackground(
+      context,
+      CANVAS_HEIGHT,
+      CANVAS_WIDTH,
+      pauseObj.backgroundColor
+    );
+    this.drawText(context, {
+      font: "monospace",
+      fontSize: "30px",
+      content: pauseObj.message,
+      color: "pink",
+      x: CANVAS_WIDTH / 2,
+      y: CANVAS_HEIGHT / 2,
+    });
+  }
+  drawMenu(context, menuObj) {
+    this.drawText(context, {
+      font: "monospace",
+      fontSize: `${menuObj.fontSize}px`,
+      content: "||",
+      color: "red",
+      x: menuObj.x,
+      y: menuObj.y,
+    });
   }
 }
 
