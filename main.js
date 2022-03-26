@@ -3,6 +3,9 @@
 //player design : a circle madeup of multiple circle layers (to have total 10 layers), first three circles/layers are lit (has power) at the start of the game.
 // everytime player gets a powerUp, a circle layer is lit up and player gains a power point. Plyer looses one if he gets hit by a low level enemy
 // player gets killed instantly if got hit by the high level enemy.
+
+// ANCHOR comment the code more.
+
 window.onload = function () {
   const canvas = document.getElementById("gameCanvas");
 
@@ -33,12 +36,16 @@ window.onload = function () {
     }
   });
 
+  // TODO add eventListner to pause game when pressed 'esc' keyDown
+  // TODO implement reset/restart-game feature
   // checks if user has clicked on pause icon, if yes -> changes game.pause state
   canvas.addEventListener("click", (e) => {
     const clickedX = e.clientX;
     const clickedY = e.clientY;
 
     const clickShape = game.pauseMenu;
+
+    // tried using isOver() function here as well but textAlign = 'center' is fucking it over, so improvising here
 
     if (
       clickedX > clickShape.x - clickShape.fontSize / 2 &&
@@ -51,6 +58,18 @@ window.onload = function () {
         loop();
       }
     }
+
+    // console.log(game.isOver(clickedX, clickedY, game.pauseMenu.resumeButton));
+
+    if (
+      game.pause &&
+      game.isOver(clickedX, clickedY, game.pauseMenu.resumeButton)
+    ) {
+      console.log("imin");
+
+      game.pause = false;
+      loop();
+    }
   });
 
   let lastUpdateTime = Date.now();
@@ -59,7 +78,7 @@ window.onload = function () {
   const loop = function () {
     console.log(game.enemies.enemyArray);
     if (game.pause) {
-      display.drawPauseMenu(ctx, game.pauseMenu);
+      display.drawPauseMenu(ctx, game.pauseMenu, game.pauseMenu.resumeButton);
       return;
     }
     if (game.player.isDied) {

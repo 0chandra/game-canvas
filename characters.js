@@ -1,3 +1,6 @@
+// NOTE if possible, implement an entity class, which holds all the necessary information an entity of this game must have like position, canAttack, canMove etc. every other class shall inheritant that class
+// TODO impl. a lightning class (use this sprite -> https://pimen.itch.io/thunder-spell-effect-02). lighning is an natural and a random attack which will reduce the player's health points to half
+
 class Npc {
   constructor(
     velX,

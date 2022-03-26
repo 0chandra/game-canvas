@@ -3,11 +3,9 @@
 // velocityX and velocityY, gravity are what their names suggest; defines the physics of the game.
 // update method is recalled at each frame using requestAnimationFrame Loop
 
-// todo jump
-
-// todo velocity implementation
-
-// todo gravity implementation
+// TODO remove unnecessary console.log
+// TODO display no. of killed enemies
+// TODO if crosses a particular no. of kills, start the boss fight
 
 class Game {
   constructor(gameHeight, gameWidth, pressedKeys) {
@@ -17,7 +15,7 @@ class Game {
     this.inAirHeight = 0;
     this.pause = false;
     this.powerUps = [];
-    this.enemies = { generateEnemy: true, enemyArray: [] };
+    this.enemies = { generateEnemy: true, enemyArray: [], killedEnemies: 0 };
     this.attacks = []; //only airborne attacks
     this.pauseMenu = {
       x: CANVAS_WIDTH - 40,
@@ -25,6 +23,15 @@ class Game {
       fontSize: "20",
       backgroundColor: "rgb(0,0,0,.50)",
       message: "Game Paused",
+      resumeButton: {
+        x: CANVAS_WIDTH / 2 - 150 / 2,
+        y: CANVAS_HEIGHT / 2 - 40 / 2,
+        width: 150,
+        height: 40,
+        fontSize: "25px",
+        message: "resume",
+        color: "black",
+      },
     };
 
     this.player = new Player();
@@ -358,5 +365,29 @@ class Game {
       x: x,
       y: y,
     };
+  }
+
+  isOver(clickedX, clickedY, clickShape, h, w) {
+    const height = typeof h === "undefined" ? clickShape.height : h;
+    const width = typeof w === "undefined" ? clickShape.width : w;
+
+    // console.log(height, width, h, w);
+
+    console.log(
+      clickedX < clickShape.x + width,
+      clickedX > clickShape.x,
+      clickedY < clickShape.y + height,
+      clickedY > clickShape.y
+    );
+
+    if (
+      clickedX < clickShape.x + width &&
+      clickedX > clickShape.x &&
+      clickedY < clickShape.y + height &&
+      clickedY > clickShape.y
+    ) {
+      return true;
+    }
+    return false;
   }
 }

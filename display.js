@@ -105,7 +105,7 @@ class Display {
     context.fillText(textObj.content, textObj.x, textObj.y);
     context.textAlign = textObj.textAlign || "center";
   }
-  drawPauseMenu(context, pauseObj) {
+  drawPauseMenu(context, pauseObj, resumeButton) {
     this.drawBackground(
       context,
       CANVAS_HEIGHT,
@@ -118,7 +118,21 @@ class Display {
       content: pauseObj.message,
       color: "pink",
       x: CANVAS_WIDTH / 2,
-      y: CANVAS_HEIGHT / 2,
+      y: CANVAS_HEIGHT / 2 - 50,
+    });
+    this.drawRect(context, {
+      x: resumeButton.x,
+      y: resumeButton.y,
+      width: resumeButton.width,
+      height: resumeButton.height,
+    });
+    this.drawText(context, {
+      font: "monospace",
+      fontSize: resumeButton.fontSize,
+      content: resumeButton.message,
+      color: resumeButton.color,
+      x: CANVAS_WIDTH / 2,
+      y: CANVAS_HEIGHT / 2 + 8,
     });
   }
   drawMenu(context, menuObj) {
