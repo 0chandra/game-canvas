@@ -1,5 +1,5 @@
 // NOTE if possible, implement an entity class, which holds all the necessary information an entity of this game must have like position, canAttack, canMove etc. every other class shall inheritant that class
-// TODO impl. a lightning class (use this sprite -> https://pimen.itch.io/thunder-spell-effect-02). lighning is an natural and a random attack which will reduce the player's health points to half
+// TODO impl. a long distance/air-bourne attack for plaayer/hero
 
 class Npc {
   constructor(
@@ -189,6 +189,8 @@ class Worm extends Npc {
       false
     );
 
+    this.isCounted = false;
+
     this.defaultVelocityX = 1 + Math.random();
     this.velocityX = this.defaultVelocityX;
 
@@ -217,6 +219,8 @@ class Skeleton extends Npc {
       "skeleton-attack",
       8
     );
+
+    this.isCounted = false;
 
     this.defaultVelocityX = 1 + Math.random();
     this.velocityX = this.defaultVelocityX;

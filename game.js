@@ -141,6 +141,7 @@ class Game {
     }
 
     // action - sword moves, wont work while character is running, jumping (is inAir) or performing another action move
+    //REVIEW
     if (!character.inAction && !character.isRunning && !character.inAir) {
       if (this.pressedKeys.indexOf("Control") > -1) {
         this.strike(character, "hero-sword1", 4);
@@ -289,6 +290,11 @@ class Game {
     }
     this.enemies.generateEnemy = false;
     this.enemies.enemyArray.forEach((enemy, index) => {
+      if (enemy.isDied && !enemy.isCounted) {
+        this.enemies.killedEnemies++;
+        enemy.isCounted = true;
+        return;
+      }
       if (
         this.player.colideX2Default > enemy.x &&
         this.player.colideX1Default < enemy.x
@@ -356,15 +362,27 @@ class Game {
     }
   }
 
-  score(x, y) {
-    return {
-      font: "monospace",
-      fontSize: "30px",
-      content: this.player.power,
-      color: "black",
-      x: x,
-      y: y,
+  gameStats(x, y) {
+    const stats = {
+      health: {
+        font: "monospace",
+        fontSize: "25px",
+        content: `health ${this.player.power}`,
+        color: "black",
+        x: x,
+        y: y,
+      },
+      kills: {
+        font: "monospace",
+        fontSize: "25px",
+        content: `kills ${this.enemies.killedEnemies}`,
+        color: "black",
+        x: x,
+        y: y,
+      },
     };
+
+    return stats;
   }
 
   isOver(clickedX, clickedY, clickShape, h, w) {

@@ -22,6 +22,14 @@ window.onload = function () {
   document.addEventListener("keydown", (e) => {
     control.keyDown(e);
     // game.move(game.player);
+    // eventListner to pause game when pressed 'esc' keyDown
+    if (e.key == "Escape") {
+      console.log("lololol");
+      game.pause = !game.pause;
+      if (!game.pause) {
+        loop();
+      }
+    }
   });
   document.addEventListener("keyup", (e) => {
     control.keyUp(e);
@@ -35,8 +43,6 @@ window.onload = function () {
       game.pause = true;
     }
   });
-
-  // TODO add eventListner to pause game when pressed 'esc' keyDown
   // TODO implement reset/restart-game feature
   // checks if user has clicked on pause icon, if yes -> changes game.pause state
   canvas.addEventListener("click", (e) => {
@@ -118,7 +124,8 @@ window.onload = function () {
       });
 
       game.updateEnemies();
-      display.drawText(ctx, game.score(30, 40));
+      display.drawText(ctx, game.gameStats(100, 40).health);
+      display.drawText(ctx, game.gameStats(280, 40).kills);
       display.drawMenu(ctx, game.pauseMenu);
 
       display.drawPowerLevel(ctx, game.powerLevel);
